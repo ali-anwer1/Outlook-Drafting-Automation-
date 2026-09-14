@@ -1,0 +1,5 @@
+subject: "Today's Daily Task | {user_name} | {date_long}"
+body: |
+  Dear manager/team leader/supervisor/etc.,
+
+  This is my task report for today, {day_name}, {date_short}.
