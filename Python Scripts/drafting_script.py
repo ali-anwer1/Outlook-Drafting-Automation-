@@ -194,7 +194,6 @@ with sync_playwright() as p:
 
         page.goto("https://outlook.office.com/mail")
 
-        page.pause()
         # Click the "New" button to start composing a new email
         page.get_by_role("button", name="New mail", exact=True).click()
 

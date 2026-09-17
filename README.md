@@ -3,7 +3,7 @@
 
 Truth be told I always wanted a reason to create some sort of automation script while at work, and I found a convenient reason to do it with this project. Simply put, at the end of each day I had to submit an email detailing the tasks that I am currently working on or update previous tasks to indicate their completion status. Therefore, instead of manually drafting the same email day in day out, or even using a template email which would still require some level of labour, I decided to automate most of this drafting process so that I won't have to spend time typing up or changing bits and details in my emails, or make little but noticeable mistakes like putting in the wrong date or adding the wrong task.
 
-## The automation works as such:
+## The automation works as such
 
 1. The login script runs first, opening the Outlook logon page in Edge.
 2. The script fills in details like the username and password.
@@ -14,7 +14,7 @@ Truth be told I always wanted a reason to create some sort of automation script 
 6. The script will keep running while waiting for the user to check, edit and send the email.
 7. Once the user has sent the email and closes the Outlook page, the drafting script will stop.
 
-## Setup:
+## Setup
 
 1. Download a code editor (VSCode is preferable but any editor of your choice will work).
 2. Download [Python](https://www.python.org/downloads/), ideally the newer versions as I am running my scripts in a Python 3.13 environment.
@@ -40,7 +40,7 @@ Two YAML files sit alongside the script. Neither is committed to this repo —
 | `user_name` | Your name, used in the email subject line | `Jane Doe` |
 | `signature` | Your signature to be added at the end of the email body | `Work Signature` |
 | `excel_path` | Full path to the task tracker workbook | `C:\Users\you\Documents\TaskTracker.xlsx` |
-| `sheet_name` | The name of the excel sheets in your task spreadsheet (refer to the excel spreadsheet example of how it should look like) | `- Tasks\n -Selected_Reports\n - Recipients` |
+| `sheet_name` | The name of the excel sheets in your task spreadsheet (refer to the excel spreadsheet example of how it should look like) | ` Tasks` `Selected_Reports` `Recipients` |
 
 ### template.yaml
 
