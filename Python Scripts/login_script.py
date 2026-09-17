@@ -1,6 +1,12 @@
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as TimeoutError
 import yaml
+from pathlib import Path
+
+# Load config and email template from YAML files
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+config_path = BASE_DIR / "yaml files" / "config.yaml"
 
 # Load email and password from config.yaml
 with open("config.yaml") as f:
