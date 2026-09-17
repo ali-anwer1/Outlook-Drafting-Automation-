@@ -13,7 +13,7 @@ from datetime import datetime
 today = datetime.now()
 
 # Load config and email template from YAML files
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 config_path = BASE_DIR / "yaml files" / "config.yaml"
 template_path = BASE_DIR / "yaml files" / "template.yaml"
@@ -162,9 +162,10 @@ EXCLUDED_COLUMNS = ["Add to email"]
 report_df = report_df.drop(columns=EXCLUDED_COLUMNS, errors="ignore")
 
 # Prepare the email subject and body using the loaded template, and build an HTML table for the email body
+# Modify the script here if you intend to include additional dynamic content in the email body, such as a summary of tasks or other relevant information.
 subject = template["subject"].format(user_name=config["user_name"],date_long=today.strftime("%d %B %Y"))
 
-body = template["body"].format(manager=config["manager"],day_name=today.strftime("%A"),date_short=today.strftime("%d/%m/%Y"))
+body = template["body"].format(day_name=today.strftime("%A"),date_short=today.strftime("%d/%m/%Y"))
 
 html_table = build_styled_html_table(report_df)
 
@@ -193,8 +194,9 @@ with sync_playwright() as p:
 
         page.goto("https://outlook.office.com/mail")
 
+        page.pause()
         # Click the "New" button to start composing a new email
-        page.get_by_role("button", name="New", exact=True).click()
+        page.get_by_role("button", name="New mail", exact=True).click()
 
         # Fill in the "To" and "Cc" fields with the extracted recipients
         fill_recipients_field(page, "To", to_recipients)

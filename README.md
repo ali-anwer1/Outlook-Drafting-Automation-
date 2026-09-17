@@ -21,7 +21,7 @@ Truth be told I always wanted a reason to create some sort of automation script 
 3. (Optional) If using VSCode download the Python and Python Environment extensions.
 4. (Optional) Recommended to create a Python environment to isolate the modules to stay within your automation folder.
 5. Install the necessary python modules in requirements.txt by running the following command in your folder's terminal: `pip install -r requirements.txt`
-6. Install the required browsers for Playwright by running the following command in the same terminal: `playwright install`
+6. Install the required browsers for Playwright by running the following command in the same terminal: `python -m playwright install`
 7. (Optional) If you would like to test your Playwright installation you can use the code provided from the [Playwright for Python Documentation](https://playwright.dev/python/docs/intro).
 8. Change the yaml file names according to your needs.
 
@@ -54,3 +54,24 @@ reworded without touching any paths or personal details.
 
 Placeholders are filled in at runtime, e.g. `{date_long}` becomes
 `15 September 2026`.
+
+## Scheduling
+
+In order to make the scripts automated (or at least not require you running them manually), scheduling them to run at your desired specified time is necessary. The setup below is for Windows users only.
+
+Note, each script has to be scheduled individually, so if you would like to run both scripts in an automated fashion then you will need to schedule two tasks. The login script should be scheduled before the email script as mentioned earlier.
+
+1. Open Task Scheduler either using the run command or Windows search.
+2. Select the `Create Task` button in the `Actions` tab (do not select "Create Basic Task").
+3. Provide a name and description.
+4. Go to the `Triggers` tab and select `New...`:
+    - Leave the `Begin the task:` option as is.
+    - Change the `Settings` so that the task is triggered `Weekly` (or choose `Daily` if you want the task to trigger everyday).
+    - Tick the weekday options so that the task is triggered on those days only (unless if you want them to run on different days).
+    - Change the start time to your preferred time for when the task should trigger.
+    - (Optional) If you tend to forget that you have a task running after several days then tick the `Stop task if it runs longer than:` option in Advanced settings.
+5. Go to the `Actions` tab and select `New...`:
+    - Under the `Settings` field, in the `Program/script:` box fill in the path to the batch file which contains your specified script.
+    - Refer to the comments in the batch files to configure them according to your needs.
+6. Go to the `Conditions` tab and untick both `Stop if the computer swtiches to battery power` and `Start the task only if the computer is on AC power` options.
+7. Click the `OK` button below once everything has been set up.

@@ -1,19 +1,15 @@
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as TimeoutError
-from pathlib import Path
 import yaml
 
-# Define the path to the config.yaml file
-BASE_DIR = Path(__file__).resolve().parent
-file_path = BASE_DIR / "yaml files" / "config.yaml"
-
 # Load email and password from config.yaml
-with open(file_path, "r") as f:
+with open("config.yaml") as f:
     config = yaml.safe_load(f)
 
 with sync_playwright() as p:
     try:
         # Launch the browser (Edge) and create a new context
+        # Any chromium-based browser can be used, but Edge is specified here for compatibility with Outlook.
         browser = p.chromium.launch(
             # executable_path=r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", if you want to specify the path to the Edge browser executable
             channel="msedge",
