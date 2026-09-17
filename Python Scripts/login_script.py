@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 config_path = BASE_DIR / "yaml files" / "config.yaml"
 
 # Load email and password from config.yaml
-with open("config.yaml") as f:
+with open(config_path, "r") as f:
     config = yaml.safe_load(f)
 
 with sync_playwright() as p:
