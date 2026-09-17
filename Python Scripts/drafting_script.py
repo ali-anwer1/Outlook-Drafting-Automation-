@@ -195,7 +195,7 @@ with sync_playwright() as p:
         page.goto("https://outlook.office.com/mail")
 
         # Click the "New" button to start composing a new email
-        page.get_by_role("button", name="New mail", exact=True).click()
+        page.get_by_role("button", name="New", exact=True).click()
 
         # Fill in the "To" and "Cc" fields with the extracted recipients
         fill_recipients_field(page, "To", to_recipients)
