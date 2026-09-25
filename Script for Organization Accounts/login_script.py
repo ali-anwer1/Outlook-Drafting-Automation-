@@ -19,11 +19,12 @@ with sync_playwright() as p:
         browser = p.chromium.launch(
             # executable_path=r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", if you want to specify the path to the Edge browser executable
             channel="msedge",
-            headless=False
+            headless=False,
+            args=["--start-maximized"]
         )
 
         # Create a new browser context
-        context = browser.new_context()
+        context = browser.new_context(no_viewport=True)
         page = context.new_page()
         page.goto("https://outlook.office.com")
 

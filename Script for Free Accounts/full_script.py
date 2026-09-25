@@ -15,14 +15,31 @@ today = datetime.now()
 # Load config and email template from YAML files
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-config_path = BASE_DIR / "yaml files" / "config.yaml"
-template_path = BASE_DIR / "yaml files" / "template.yaml"
+config_path = BASE_DIR / "yaml test" / "config.example.yaml"
+template_path = BASE_DIR / "yaml test" / "template.example.yaml"
 
 with open(config_path, "r") as f:
     config = yaml.safe_load(f)
 
 with open(template_path, "r") as f:
     template = yaml.safe_load(f)
+
+# OPTIONAL SETTINGS
+# ============================================================
+# True to add signature at end of email, False to not add it
+add_signature_bool = True
+
+#  If signature is to be added ensure the name of signature is correct, refer to the config.yaml file to change it
+signature_to_add = config["signature"]
+
+# True to schedule email at specific date and time, False to send it manually
+schedule_email_bool = True
+
+# Schedule date to send email, either to today's date or set your own date in string format
+email_date = today.strftime("%m/%d/%Y") # set your own date as `"month/day/year"`, e.g. `"10/03/2026"` for October 10, 2026
+# Schedule time to send email, has to be in 12-hour time format, e.g. "10:30 AM" or "3:30 PM"
+email_time = "5:30 PM"
+# ============================================================
 
 # Define color mappings for specific values in the "Status" and "Priority" columns
 STATUS_COLORS = {
@@ -104,6 +121,39 @@ def fill_recipients_field(page, label, recipients):
         page.keyboard.press("Enter")
         page.wait_for_timeout(500)
 
+def add_signature(page, signature, run=False):
+    # Adds signature at the of email body.
+
+    if run: 
+        # Ensures the body is set before applying the signature
+        page.keyboard.press("Enter")  
+
+        # Adds specific signature based on user selection
+        page.get_by_role("button", name="Signature").click()
+        page.get_by_role("menuitem", name=signature).click()
+
+def schedule_email(page, schedule_date, schedule_time, run=False):
+    # Schedules email based on user's preferred date and time
+
+    if run: 
+        # Navigate to email scheduling section in the Outlook page
+        page.get_by_role("button", name="More send options").click()
+        page.get_by_text("Schedule send").click()
+        page.get_by_role("button", name="Custom time").click()
+
+        # Fill in preferred date to send email 
+        page.get_by_role("combobox", name="Select a date").fill(schedule_date)
+
+        # Clear current time selection
+        page.get_by_role("combobox", name="Select a time").click()
+        page.keyboard.press("ControlOrMeta+a")
+        # Fill in preferred time to send email
+        page.keyboard.insert_text(schedule_time)
+        page.keyboard.press("Enter")
+
+        page.get_by_role("button", name="Send").click()
+            
+
 # ============================================================
 # DATA EXTRACTION AND PROCESSING SECTION
 # ============================================================
@@ -157,7 +207,7 @@ selected_tasks = tasks_df[tasks_df["No"].isin(selected_ids)]
 report_df = pd.concat([today_tasks,completed_tasks, selected_tasks]).drop_duplicates(subset="No").sort_values(by="No")
 
 # Remove the "Add to Email" column from the report DataFrame, as it's not needed for the email content
-EXCLUDED_COLUMNS = ["Add to email"]
+EXCLUDED_COLUMNS = ["Add To Email"]
 
 report_df = report_df.drop(columns=EXCLUDED_COLUMNS, errors="ignore")
 
@@ -181,26 +231,31 @@ final_html_body = (
 # This section uses Playwright to automate the process of composing and sending an email in Outlook. It launches the Edge browser, loads the saved session state, navigates to the Outlook mail page, fills in the "To" and "Cc" fields with the extracted recipients, sets the subject and body of the email, and applies the user's signature.
 with sync_playwright() as p:
     try:
-        browser = p.chromium.launch(
-            channel="msedge",
-            headless=False
-        )
-
-        context = browser.new_context(
-            storage_state="outlook_session.json"
-        )
-
+        browser = p.chromium.launch(headless=False, args=["--start-maximized"])
+        context = browser.new_context(no_viewport=True)
         page = context.new_page()
+        page.goto("https://outlook.office.com")
 
-        page.goto("https://outlook.office.com/mail")
+        page.get_by_role("textbox", name="Enter your email, phone, or").fill(config["email"])
+        page.keyboard.press("Enter")
+
+        page.get_by_role("button", name="Use your password").click()
+
+        page.get_by_role("textbox", name="Password").fill(config["password"])
+        page.keyboard.press("Enter")
+
+        page.get_by_test_id("dismissIcon").click()
 
         # Click the "New" button to start composing a new email
-        page.get_by_role("button", name="New", exact=True).click()
+        page.get_by_role("button", name="New mail", exact=True).click()
 
         # Fill in the "To" and "Cc" fields with the extracted recipients
         fill_recipients_field(page, "To", to_recipients)
-        fill_recipients_field(page, "Cc", cc_recipients)
 
+        if cc_recipients:
+            page.get_by_role("button", name="Cc", exact=True).click()
+            fill_recipients_field(page, "Cc", cc_recipients)
+        
         # Set the subject of the email
         page.get_by_placeholder("Add a subject").fill(subject)
 
@@ -224,16 +279,16 @@ with sync_playwright() as p:
             [final_html_body, body],
         )
 
-        # Ensure the body is properly set before applying the signature
-        # page.keyboard.press("Enter")  
+        # Adds signature if True
+        add_signature(page, signature_to_add, add_signature_bool)
 
-        # Apply the user's signature by clicking the "Signature" button and selecting the appropriate signature from the menu
-        # page.get_by_label("Signature").click()
-        # page.get_by_role("menuitem", name=config["signature"]).click()
+        if schedule_email_bool:
+            schedule_email(page, email_date, email_time, schedule_email_bool)
+            print("Browser window closed. Exiting script.")
 
         # Wait for the user to review the email in the browser and close the window when user closes the browser window
-        print("Review the email in the browser. Close the window when you're done.")
         try:
+            print("Review the email in the browser. Close the window when you're done.")
             page.wait_for_event("close", timeout=0)
 
         finally:

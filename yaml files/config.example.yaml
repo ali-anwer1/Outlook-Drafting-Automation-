@@ -1,7 +1,7 @@
 email: "your_email@example.com"
 password: "email_password"
 user_name: "user_name"
-signature: "Work signature"
+signature: "Placeholder signature"
 excel_path: Excel Spreadsheet Example/TasksSpreadsheetExample.xlsx # change this to the path of your Excel spreadsheet
 sheet_name: 
 - Daily_Tasks

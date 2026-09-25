@@ -3,16 +3,29 @@
 
 Truth be told I always wanted a reason to create some sort of automation script while at work, and I found a convenient reason to do it with this project. Simply put, at the end of each day I had to submit an email detailing the tasks that I am currently working on or update previous tasks to indicate their completion status. Therefore, instead of manually drafting the same email day in day out, or even using a template email which would still require some level of labour, I decided to automate most of this drafting process so that I won't have to spend time typing up or changing bits and details in my emails, or make little but noticeable mistakes like putting in the wrong date or adding the wrong task.
 
-## The automation works as such
+## The automation works as such 
 
-1. The login script runs first, opening the Outlook logon page in Edge.
+### For personal/free accounts
+
+1. (Manually done) The excel spreadsheet of tasks is updated by the user.
+2. `full_script.py` runs, opening an Outlook page in Chrome (or any Chromium-based browser installed)
+3. The script first fills in the email and password to log into the user's account.
+4. The script will create a new mail and add in content like recipients, email subject, message body (which includes content from the spreadsheet if it is filled), and signature if desired.
+5. (Optional) If the user chose the option to schedule the email then the script will schedule to send the email according to the specified date and time in the script.
+6. The script will keep running waiting for the user to check and make changes to the email if necessary.
+7. Once the user is satisfied and has sent the email, they should close the Outlook page and the drafting script will stop immediately.
+
+### For organization accounts
+
+1. `login_script.py` runs first, opening the Outlook logon page in Edge.
 2. The script fills in details like the username and password.
 3. Once the account has been logged in, the outlook session state of the page is saved in a json file and the login script stops running.
-4. (Manually done) An excel spreadsheet of daily tasks is updated to today's date.
-5. The drafting script runs, opening the logged in Outlook page of the user.
-5. The script will fill in content like the recipients of the email, the subject, the body and include content from the spreadsheet into a new email draft.
-6. The script will keep running while waiting for the user to check, edit and send the email.
-7. Once the user has sent the email and closes the Outlook page, the drafting script will stop.
+4. (Manually done) The excel spreadsheet of daily tasks is updated to today's date.
+5. `drafting_script.py` runs, opening the logged in Outlook page of the user.
+6. The script will fill in content like the recipients of the email, the subject, the body and include content from the spreadsheet into a new email draft.
+7. (Optional) If the user chose the option to schedule the email then the script will schedule to send the email according to the specified date and time in the script.
+8. The script will keep running while waiting for the user to check, edit and send the email.
+9. Once the user has sent the email and closes the Outlook page, the drafting script will stop.
 
 ## Setup
 
@@ -54,6 +67,10 @@ reworded without touching any paths or personal details.
 
 Placeholders are filled in at runtime, e.g. `{date_long}` becomes
 `15 September 2026`.
+
+## Spreadsheet
+
+
 
 ## Scheduling
 

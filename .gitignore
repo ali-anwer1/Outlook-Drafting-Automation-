@@ -1,3 +1,7 @@
 .venv/
 
+yaml test/
+
 outlook_session.json
+
+test.py
