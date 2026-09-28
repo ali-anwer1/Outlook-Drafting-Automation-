@@ -1,4 +1,3 @@
-<img width="1573" height="763" alt="final_email_view" src="https://github.com/user-attachments/assets/ea09ccd7-6b11-47b2-9f00-44b3099231d6" /># Outlook-Drafting-Automation-
 **Python scripts intended to semi-automate the process of drafting daily Outlook emails.**
 
 Truth be told I always wanted a reason to create some sort of automation script while at work, and I found a convenient reason to do it with this project. Simply put, at the end of each day I had to submit an email detailing the tasks that I am currently working on or update previous tasks to indicate their completion status. Therefore, instead of manually drafting the same email day in day out, or even using a template email which would still require some level of labour, I decided to automate most of this drafting process so that I won't have to spend time typing up or changing bits and details in my emails, or make little but noticeable mistakes like putting in the wrong date or adding the wrong task.
