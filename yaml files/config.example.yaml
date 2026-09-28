@@ -1,7 +1,11 @@
 email: "your_email@example.com"
 password: "email_password"
 user_name: "user_name"
-signature: "Placeholder signature"
+add_signature: true # to add signature at end of email type true, otherwise type in false
+signature: "Placeholder sign"
+schedule_email: true # to schedule email at specific time type true, otherwise type false
+schedule_date: "today" # type "today" if email is scheduled to be sent today, else type in your own date as "month/day/year", e.g. "10/03/2026" for October 3rd, 2026
+schedule_time: "5:30 PM" # schedule time to send email, has to be in 12-hour time format, e.g. "10:30 AM" or "3:30 PM"
 excel_path: Excel Spreadsheet Example/TasksSpreadsheetExample.xlsx # change this to the path of your Excel spreadsheet
 sheet_name: 
 - Daily_Tasks

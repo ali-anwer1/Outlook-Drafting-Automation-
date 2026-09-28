@@ -1,9 +1,11 @@
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError
 import pandas as pd
 from pathlib import Path
 import yaml
 from openpyxl import load_workbook
 from datetime import datetime
+import re
 
 # ============================================================
 # INITIALIZATION AND CONFIGURATION SECTION
@@ -15,8 +17,8 @@ today = datetime.now()
 # Load config and email template from YAML files
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-config_path = BASE_DIR / "yaml test" / "config.example.yaml"
-template_path = BASE_DIR / "yaml test" / "template.example.yaml"
+config_path = BASE_DIR / "yaml files" / "config.example.yaml"
+template_path = BASE_DIR / "yaml files" / "template.example.yaml"
 
 with open(config_path, "r") as f:
     config = yaml.safe_load(f)
@@ -27,18 +29,20 @@ with open(template_path, "r") as f:
 # OPTIONAL SETTINGS
 # ============================================================
 # True to add signature at end of email, False to not add it
-add_signature_bool = True
+add_signature_bool = config["add_signature"]
 
 #  If signature is to be added ensure the name of signature is correct, refer to the config.yaml file to change it
 signature_to_add = config["signature"]
 
 # True to schedule email at specific date and time, False to send it manually
-schedule_email_bool = True
+schedule_email_bool = config["schedule_email"]
 
-# Schedule date to send email, either to today's date or set your own date in string format
-email_date = today.strftime("%m/%d/%Y") # set your own date as `"month/day/year"`, e.g. `"10/03/2026"` for October 10, 2026
-# Schedule time to send email, has to be in 12-hour time format, e.g. "10:30 AM" or "3:30 PM"
-email_time = "5:30 PM"
+if config["schedule_date"].lower() == "today":
+    email_date = today.strftime("%m/%d/%Y")
+else:
+    email_date = config["schedule_date"]
+
+email_time = config["schedule_time"]
 # ============================================================
 
 # Define color mappings for specific values in the "Status" and "Priority" columns
@@ -60,6 +64,41 @@ COLUMN_COLOR_MAPS = {
     "Status": STATUS_COLORS,
     "Priority": PRIORITY_COLORS,
 }
+
+def dismiss_recovery_popup():
+    # If Microsoft recovery popup appears immediately close it
+    page.get_by_role("button", name="Not now").first.click()
+
+def sweep_popup(page, seconds=5):
+    # Continuously polls to check for Microsoft recovery popup and closes it
+    for _ in range(seconds * 2):
+        if popup.is_visible():
+            dismiss_recovery_popup()
+        page.wait_for_timeout(500)
+
+def reset_to_draft(page):
+    # Close any menu or dialog left half-open by the popup
+
+    open_ui = page.locator('[role="menu"], [role="dialog"]')
+    if open_ui.first.is_visible():
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(500)
+
+    # Return focus to the end of the email body
+    page.get_by_label("Message body").click()
+    page.keyboard.press("Control+End")
+    page.wait_for_timeout(500)
+
+def run_phase(fn, *args, attempts=2):
+    # If popup appears while a function is running then it will re-run the function again due to the popup interruption
+
+    for i in range(attempts):
+        try:
+            return fn(*args)
+        except TimeoutError:
+            if i == attempts - 1:
+                raise
+            reset_to_draft(page)
 
 def build_styled_html_table(df, column_color_maps=COLUMN_COLOR_MAPS, include_headers=False):
     # Builds an HTML table where each column in column_color_maps gets its cells
@@ -121,37 +160,35 @@ def fill_recipients_field(page, label, recipients):
         page.keyboard.press("Enter")
         page.wait_for_timeout(500)
 
-def add_signature(page, signature, run=False):
+def add_signature(page, signature):
     # Adds signature at the of email body.
 
-    if run: 
-        # Ensures the body is set before applying the signature
-        page.keyboard.press("Enter")  
+    # Ensures the body is set before applying the signature
+    page.keyboard.press("Enter")  
 
-        # Adds specific signature based on user selection
-        page.get_by_role("button", name="Signature").click()
-        page.get_by_role("menuitem", name=signature).click()
+    # Adds specific signature based on user selection
+    page.get_by_role("button", name="Signature").click()
+    page.get_by_role("menuitem", name=signature).click()
 
-def schedule_email(page, schedule_date, schedule_time, run=False):
+def schedule_email(page, schedule_date, schedule_time):
     # Schedules email based on user's preferred date and time
+  
+    # Navigate to email scheduling section in the Outlook page
+    page.get_by_role("button", name="More send options").click()
+    page.get_by_text("Schedule send").click()
+    page.get_by_role("button", name="Custom time").click()
 
-    if run: 
-        # Navigate to email scheduling section in the Outlook page
-        page.get_by_role("button", name="More send options").click()
-        page.get_by_text("Schedule send").click()
-        page.get_by_role("button", name="Custom time").click()
+    # Fill in preferred date to send email 
+    page.get_by_role("combobox", name="Select a date").fill(schedule_date)
 
-        # Fill in preferred date to send email 
-        page.get_by_role("combobox", name="Select a date").fill(schedule_date)
+    # Clear current time selection
+    page.get_by_role("combobox", name="Select a time").click()
+    page.keyboard.press("ControlOrMeta+a")
+    # Fill in preferred time to send email
+    page.keyboard.insert_text(schedule_time)
+    page.keyboard.press("Enter")
 
-        # Clear current time selection
-        page.get_by_role("combobox", name="Select a time").click()
-        page.keyboard.press("ControlOrMeta+a")
-        # Fill in preferred time to send email
-        page.keyboard.insert_text(schedule_time)
-        page.keyboard.press("Enter")
-
-        page.get_by_role("button", name="Send").click()
+    page.get_by_role("button", name="Send").click()
             
 
 # ============================================================
@@ -235,6 +272,8 @@ with sync_playwright() as p:
         context = browser.new_context(no_viewport=True)
         page = context.new_page()
         page.goto("https://outlook.office.com")
+        popup = page.get_by_text(re.compile(r"Keep access to your account", re.I))
+        page.add_locator_handler(popup, dismiss_recovery_popup)
 
         page.get_by_role("textbox", name="Enter your email, phone, or").fill(config["email"])
         page.keyboard.press("Enter")
@@ -255,7 +294,7 @@ with sync_playwright() as p:
         if cc_recipients:
             page.get_by_role("button", name="Cc", exact=True).click()
             fill_recipients_field(page, "Cc", cc_recipients)
-        
+
         # Set the subject of the email
         page.get_by_placeholder("Add a subject").fill(subject)
 
@@ -278,17 +317,18 @@ with sync_playwright() as p:
             """,
             [final_html_body, body],
         )
-
-        # Adds signature if True
-        add_signature(page, signature_to_add, add_signature_bool)
+        
+        if add_signature_bool:
+            run_phase(add_signature, page, signature_to_add)
 
         if schedule_email_bool:
-            schedule_email(page, email_date, email_time, schedule_email_bool)
-            print("Browser window closed. Exiting script.")
+            run_phase(schedule_email, page, email_date, email_time)
 
         # Wait for the user to review the email in the browser and close the window when user closes the browser window
         try:
             print("Review the email in the browser. Close the window when you're done.")
+            page.remove_locator_handler(popup)
+            sweep_popup(page)
             page.wait_for_event("close", timeout=0)
 
         finally:

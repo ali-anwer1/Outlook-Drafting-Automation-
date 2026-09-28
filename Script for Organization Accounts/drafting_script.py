@@ -27,18 +27,21 @@ with open(template_path, "r") as f:
 # OPTIONAL SETTINGS
 # ============================================================
 # True to add signature at end of email, False to not add it
-add_signature_bool = True
+add_signature_bool = config["add_signature"]
 
 #  If signature is to be added ensure the name of signature is correct, refer to the config.yaml file to change it
 signature_to_add = config["signature"]
 
 # True to schedule email at specific date and time, False to send it manually
-schedule_email_bool = True
+schedule_email_bool = config["schedule_email"]
 
-# Schedule date to send email, either to today's date or set your own date in string format
-email_date = today.strftime("%m/%d/%Y") # set your own date as `"month/day/year"`, e.g. `"10/03/2026"` for October 10, 2026
-# Schedule time to send email, has to be in 12-hour time format, e.g. "10:30 AM" or "3:30 PM"
-email_time = "5:30 PM"
+if config["schedule_date"].lower() == "today":
+    email_date = today.strftime("%m/%d/%Y")
+else:
+    email_date = config["schedule_date"]
+
+email_time = config["schedule_time"]
+# ============================================================
 
 # Define color mappings for specific values in the "Status" and "Priority" columns
 STATUS_COLORS = {
@@ -120,37 +123,35 @@ def fill_recipients_field(page, label, recipients):
         page.keyboard.press("Enter")
         page.wait_for_timeout(500)
 
-def add_signature(page, signature, run=False):
+def add_signature(page, signature):
     # Adds signature at the of email body.
 
-    if run: 
-        # Ensures the body is set before applying the signature
-        page.keyboard.press("Enter")  
+    # Ensures the body is set before applying the signature
+    page.keyboard.press("Enter")  
 
-        # Adds specific signature based on user selection
-        page.get_by_label("Signature").click()
-        page.get_by_role("menuitem", name=signature).click()
+    # Adds specific signature based on user selection
+    page.get_by_role("button", name="Signature").click()
+    page.get_by_role("menuitem", name=signature).click()
 
-def schedule_email(page, schedule_date, schedule_time, run=False):
+def schedule_email(page, schedule_date, schedule_time):
     # Schedules email based on user's preferred date and time
+  
+    # Navigate to email scheduling section in the Outlook page
+    page.get_by_role("button", name="More send options").click()
+    page.get_by_text("Schedule send").click()
+    page.get_by_role("button", name="Custom time").click()
 
-    if run: 
-        # Navigate to email scheduling section in the Outlook page
-        page.get_by_role("button", name="More send options").click()
-        page.get_by_text("Schedule send").click()
-        page.get_by_role("button", name="Custom time").click()
+    # Fill in preferred date to send email 
+    page.get_by_role("combobox", name="Select a date").fill(schedule_date)
 
-        # Fill in preferred date to send email 
-        page.get_by_role("combobox", name="Select a date").fill(schedule_date)
+    # Clear current time selection
+    page.get_by_role("combobox", name="Select a time").click()
+    page.keyboard.press("ControlOrMeta+a")
+    # Fill in preferred time to send email
+    page.keyboard.insert_text(schedule_time)
+    page.keyboard.press("Enter")
 
-        # Clear current time selection
-        page.get_by_role("combobox", name="Select a time").click()
-        page.keyboard.press("ControlOrMeta+a")
-        # Fill in preferred time to send email
-        page.keyboard.insert_text(schedule_time)
-        page.keyboard.press("Enter")
-
-        page.get_by_role("button", name="Send").click()
+    page.get_by_role("button", name="Send").click()
 
 # ============================================================
 # DATA EXTRACTION AND PROCESSING SECTION
@@ -277,12 +278,11 @@ with sync_playwright() as p:
             [final_html_body, body],
         )
 
-        # Adds signature if True
-        add_signature(page, signature_to_add, add_signature_bool)
+        if add_signature_bool:
+            add_signature(page, signature_to_add)
 
         if schedule_email_bool:
-            schedule_email(page, email_date, email_time, schedule_email_bool)
-            print("Browser window closed. Exiting script.")
+            schedule_email(page, email_date, email_time)
 
         # Wait for the user to review the email in the browser and close the window when user closes the browser window
         try:

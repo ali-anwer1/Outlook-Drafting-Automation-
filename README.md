@@ -48,12 +48,16 @@ Two YAML files sit alongside the script. Neither is committed to this repo —
 
 | Key | Description | Example |
 |---|---|---|
-| `email` | Your outlook email | `your_email@example.com` |
-| `password` | The password to your outlook email | `Password123` |
-| `user_name` | Your name, used in the email subject line | `Jane Doe` |
-| `signature` | Your signature to be added at the end of the email body | `Work Signature` |
+| `email` | Your outlook email | `"your_email@example.com"` |
+| `password` | The password to your outlook email | `"Password123"` |
+| `user_name` | Your name, used in the email subject line | `"Jane Doe"` |
+| `add_signature` | If you want to add a signature at the end of the body, true to add, false to leave it empty | `true` |
+| `signature` | Your signature to be added at the end of the email body | `"Work Signature"` |
+| `schedule_email` | If you want to schedule when to send the email, true to schedule the email to be sent, false to send it yourself manually | `false` |
+| `schedule_date` | The date of when you would like to send the email if scheduled, can either be set as today or to some other date as "month/day/year" | `today` or `08/26/2026` |
+| `schedule_time` | The time of when you would like to send the email in the 12-hour time format | `12:45 PM` |
 | `excel_path` | Full path to the task tracker workbook | `C:\Users\you\Documents\TaskTracker.xlsx` |
-| `sheet_name` | The name of the excel sheets in your task spreadsheet (refer to the excel spreadsheet example of how it should look like) | ` Tasks` `Selected_Reports` `Recipients` |
+| `sheet_name` | The name of the excel sheets in your task spreadsheet (refer to the excel spreadsheet example of how it should look like) | `Tasks` `Selected_Reports` `Recipients` |
 
 ### template.yaml
 
@@ -70,7 +74,11 @@ Placeholders are filled in at runtime, e.g. `{date_long}` becomes
 
 ## Spreadsheet
 
-
+| Sheet Name | Description | Example | 
+|---|---|---|
+| Tasks Sheet | Main sheet to add and update tasks on a regular basis to be included into the email if desired by the user. New headers can be added to the right of the column just before the "Add To Email" header. | |
+| Task Selection Sheet | If specific tasks are to be added into the email then the user can either choose "Add" in the "Add To Email" header of the specific task or update it by typing the number for said task into this sheet | |
+| Recipients Sheet | Allows user to specify who to send and cc the email to. Note, this sheet is a must to be filled in (at least for the "To" recipient) as the script will not allow an empty recipients field when running | |
 
 ## Scheduling
 
