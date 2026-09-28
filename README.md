@@ -1,4 +1,4 @@
-**Python scripts intended to semi-automate the process of drafting daily Outlook emails.**
+# Python scripts intended to semi-automate the process of drafting daily Outlook emails.
 
 Truth be told I always wanted a reason to create some sort of automation script while at work, and I found a convenient reason to do it with this project. Simply put, at the end of each day I had to submit an email detailing the tasks that I am currently working on or update previous tasks to indicate their completion status. Therefore, instead of manually drafting the same email day in day out, or even using a template email which would still require some level of labour, I decided to automate most of this drafting process so that I won't have to spend time typing up or changing bits and details in my emails, or make little but noticeable mistakes like putting in the wrong date or adding the wrong task.
 
@@ -83,12 +83,9 @@ Placeholders are filled in at runtime, e.g. `{date_long}` becomes
 
 | Sheet Name | Description | Example | 
 |---|---|---|
-| Tasks Sheet | Main sheet to add and update tasks on a regular basis to be included into the email if desired by the user. New headers can be added to the right of the column just before the "Add To Email" header. | <img width="1344" height="346" alt="Tasks_sheet_view" src="https://github.com/user-attachments/assets/c377e566-1e5b-425e-908a-50d3e6f0eb31" />
- |
-| Task Selection Sheet | If specific tasks are to be added into the email then the user can either choose "Add" in the "Add To Email" header of the specific task or update it by typing the number for said task into this sheet | <img width="133" height="153" alt="Report_selection_sheet_view" src="https://github.com/user-attachments/assets/fc4d55be-41ca-4349-892d-e1dfa4a57da2" />
- |
-| Recipients Sheet | Allows user to specify who to send and cc the email to. Note, this sheet is a must to be filled in (at least for the "To" recipient) as the script will not allow an empty recipients field when running | <img width="442" height="142" alt="Recipients_sheet_view" src="https://github.com/user-attachments/assets/cbc10c1e-ffc1-4831-8c91-a74f15bd6671" />
- |
+| Tasks Sheet | Main sheet to add and update tasks on a regular basis to be included into the email if desired by the user. New headers can be added to the right of the column just before the "Add To Email" header. |<img width="1344" height="346" alt="Tasks_sheet_view" src="https://github.com/user-attachments/assets/c377e566-1e5b-425e-908a-50d3e6f0eb31" />|
+| Task Selection Sheet | If specific tasks are to be added into the email then the user can either choose "Add" in the "Add To Email" header of the specific task or update it by typing the number for said task into this sheet |<img width="133" height="153" alt="Report_selection_sheet_view" src="https://github.com/user-attachments/assets/fc4d55be-41ca-4349-892d-e1dfa4a57da2" />|
+| Recipients Sheet | Allows user to specify who to send and cc the email to. Note, this sheet is a must to be filled in (at least for the "To" recipient) as the script will not allow an empty recipients field when running |<img width="442" height="142" alt="Recipients_sheet_view" src="https://github.com/user-attachments/assets/cbc10c1e-ffc1-4831-8c91-a74f15bd6671" />|
 
 ## Scheduling
 
