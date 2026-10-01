@@ -137,7 +137,7 @@ def schedule_email(page, schedule_date, schedule_time):
     # Schedules email based on user's preferred date and time
   
     # Navigate to email scheduling section in the Outlook page
-    page.get_by_role("button", name="More send options").click()
+    page.get_by_label("More send options").click()
     page.get_by_text("Schedule send").click()
     page.get_by_role("button", name="Custom time").click()
 
