@@ -17,8 +17,8 @@ today = datetime.now()
 # Load config and email template from YAML files
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-config_path = BASE_DIR / "yaml files" / "config.example.yaml"
-template_path = BASE_DIR / "yaml files" / "template.example.yaml"
+config_path = BASE_DIR / "yaml files" / "config.yaml"
+template_path = BASE_DIR / "yaml files" / "template.yaml"
 
 with open(config_path, "r") as f:
     config = yaml.safe_load(f)
